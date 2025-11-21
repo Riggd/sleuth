@@ -2,10 +2,10 @@ export default function () {
 	figma.showUI(__html__, { width: 400, height: 500, themeColors: true });
 
 	// Cache for variable details to avoid repeated API calls
-	const variableCache = new Map<string, { name: string; id: string }>();
+	const variableCache = new Map<string, { name: string; id: string; resolvedType?: VariableResolvedDataType }>();
 
 	const scanNodes = async (scope: PageNode | DocumentNode) => {
-		const variableUsage = new Map<string, { name: string; count: number; layers: { name: string; id: string }[] }>();
+		const variableUsage = new Map<string, { name: string; resolvedType?: VariableResolvedDataType; count: number; layers: { name: string; id: string; visible: boolean }[] }>();
 
 		// Phase 1: Collect nodes
 		let nodes: SceneNode[] = [];
@@ -108,7 +108,7 @@ export default function () {
 				try {
 					const variable = await figma.variables.getVariableByIdAsync(id);
 					if (variable) {
-						variableCache.set(id, { name: variable.name, id: variable.id });
+						variableCache.set(id, { name: variable.name, id: variable.id, resolvedType: variable.resolvedType });
 					}
 				} catch (e) {
 					console.error("Error fetching variable", id, e);
@@ -131,6 +131,8 @@ export default function () {
 			if (!variableUsage.has(id)) {
 				variableUsage.set(id, {
 					name: info.name,
+					// @ts-ignore
+					resolvedType: info.resolvedType,
 					count: 0,
 					layers: []
 				});
@@ -139,17 +141,12 @@ export default function () {
 			const entry = variableUsage.get(id)!;
 
 			for (const node of nodesUsingVar) {
-				entry.count++;
 				// Avoid duplicates if a node uses the same variable multiple times (e.g. fill and stroke)
-				// The previous logic checked `!entry.layers.some(l => l.id === node.id)`
-				// But `varIdToNodes` might contain the same node multiple times if I pushed it multiple times?
-				// Wait, `aliases` might contain duplicates if used in multiple places on same node.
-				// `varIdToNodes.get(id)!.push(node)` pushes it for each alias.
-				// So we need to deduplicate here.
-
 				const isAlreadyListed = entry.layers.some(l => l.id === node.id);
 				if (!isAlreadyListed) {
-					entry.layers.push({ name: node.name, id: node.id });
+					const layerName = node.name || "Jump to Element";
+					entry.layers.push({ name: layerName, id: node.id, visible: node.visible });
+					entry.count++;
 				}
 			}
 		}
