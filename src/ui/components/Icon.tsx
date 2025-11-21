@@ -2,7 +2,7 @@ import React from 'react';
 
 interface IconProps {
 	size?: number;
-	svg: 'plugma' | 'plus';
+	svg: 'plugma' | 'plus' | 'visible' | 'hidden' | 'color' | 'number' | 'string' | 'boolean' | 'reset';
 }
 
 const Icon: React.FC<IconProps> = ({ size = 16, svg }) => {
@@ -22,6 +22,30 @@ const Icon: React.FC<IconProps> = ({ size = 16, svg }) => {
 						<rect width="24" height="24" fill="white" />
 					</clipPath>
 				</defs>
+			</svg>
+		);
+	}
+
+
+
+	if (svg === 'visible') {
+		return (
+			<svg width={`${size}px`} height={`${size}px`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path
+					d="M12 5C7.5 5 3.7 8.1 2 12C3.7 15.9 7.5 19 12 19C16.5 19 20.3 15.9 22 12C20.3 8.1 16.5 5 12 5ZM12 17C9.2 17 7 14.8 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 14.8 14.8 17 12 17ZM12 9C10.3 9 9 10.3 9 12C9 13.7 10.3 15 12 15C13.7 15 15 13.7 15 12C15 10.3 13.7 9 12 9Z"
+					fill="currentColor"
+				/>
+			</svg>
+		);
+	}
+
+	if (svg === 'hidden') {
+		return (
+			<svg width={`${size}px`} height={`${size}px`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path
+					d="M2 5.27L3.28 4L20 20.72L18.73 22L15.65 18.92C14.5 19.3 13.28 19.5 12 19.5C7.5 19.5 3.7 16.4 2 12.5C2.5 11.3 3.2 10.2 4 9.2L2 5.27ZM12 7.5C13.6 7.5 15 8.9 15 10.5C15 10.8 14.9 11.1 14.8 11.4L10.1 6.7C10.7 6.2 11.3 6 12 6V7.5ZM7.53 9.8L9.08 11.35C9.03 11.56 9 11.77 9 12C9 13.7 10.3 15 12 15C12.2 15 12.4 14.9 12.6 14.9L14.2 16.5C13.5 16.8 12.8 17 12 17C9.2 17 7 14.8 7 12C7 11.2 7.2 10.5 7.53 9.8ZM19.6 14.9L21.2 16.5C21.7 15.1 22 13.6 22 12C20.3 8.1 16.5 5 12 5C11.2 5 10.4 5.1 9.7 5.3L11.9 7.5C11.9 7.5 12 7.5 12 7.5C14.8 7.5 17 9.7 17 12.5C17 12.5 17 12.6 17 12.6L19.6 14.9Z"
+					fill="currentColor"
+				/>
 			</svg>
 		);
 	}
@@ -49,6 +73,129 @@ const Icon: React.FC<IconProps> = ({ size = 16, svg }) => {
 						strokeLinejoin="round"
 					/>
 				</g>
+			</svg>
+		);
+	}
+
+	if (svg === 'color') {
+		return (
+			<svg width={`${size}px`} height={`${size}px`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path
+					d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+				<path
+					d="M12 22C10.8954 22 10 21.1046 10 20C10 18.8954 10.8954 18 12 18C13.1046 18 14 18.8954 14 20C14 21.1046 13.1046 22 12 22Z"
+					fill="currentColor"
+				/>
+				<path
+					d="M7 17C5.89543 17 5 16.1046 5 15C5 13.8954 5.89543 13 7 13C8.10457 13 9 13.8954 9 15C9 16.1046 8.10457 17 7 17Z"
+					fill="currentColor"
+				/>
+				<path
+					d="M8 9C6.89543 9 6 8.10457 6 7C6 5.89543 6.89543 5 8 5C9.10457 5 10 5.89543 10 7C10 8.10457 9.10457 9 8 9Z"
+					fill="currentColor"
+				/>
+				<path
+					d="M16 9C14.8954 9 14 8.10457 14 7C14 5.89543 14.8954 5 16 5C17.1046 5 18 5.89543 18 7C18 8.10457 17.1046 9 16 9Z"
+					fill="currentColor"
+				/>
+			</svg>
+		);
+	}
+
+	if (svg === 'number') {
+		return (
+			<svg width={`${size}px`} height={`${size}px`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path
+					d="M10 3L8 21"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+				<path
+					d="M16 3L14 21"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+				<path
+					d="M3.5 9H21.5"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+				<path
+					d="M2.5 15H20.5"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+			</svg>
+		);
+	}
+
+	if (svg === 'string') {
+		return (
+			<svg width={`${size}px`} height={`${size}px`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path
+					d="M4 7V4H20V7"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+				<path
+					d="M9 20H15"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+				<path
+					d="M12 4V20"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+			</svg>
+		);
+	}
+
+	if (svg === 'boolean') {
+		return (
+			<svg width={`${size}px`} height={`${size}px`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect x="2" y="6" width="20" height="12" rx="6" stroke="currentColor" strokeWidth="1.5" />
+				<circle cx="8" cy="12" r="3" fill="currentColor" />
+			</svg>
+		);
+	}
+
+	if (svg === 'reset') {
+		return (
+			<svg width={`${size}px`} height={`${size}px`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path
+					d="M4 12C4 7.58172 7.58172 4 12 4C14.5264 4 16.7792 5.17108 18.2454 7M20 7H14M20 7V1"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+				<path
+					d="M20 12C20 16.4183 16.4183 20 12 20C9.47362 20 7.22075 18.8289 5.75463 17"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
 			</svg>
 		);
 	}

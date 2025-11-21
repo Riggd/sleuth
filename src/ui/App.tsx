@@ -5,12 +5,21 @@ import Icon from './components/Icon';
 interface ScanResult {
 	name: string;
 	count: number;
-	layers: { name: string; id: string }[];
+	resolvedType?: 'COLOR' | 'FLOAT' | 'STRING' | 'BOOLEAN';
+	layers: { name: string; id: string; visible: boolean }[];
 }
+
+const FILTER_CONFIGS = [
+	{ type: 'COLOR', icon: 'color', title: 'Filter Colors' },
+	{ type: 'FLOAT', icon: 'number', title: 'Filter Numbers' },
+	{ type: 'STRING', icon: 'string', title: 'Filter Strings' },
+	{ type: 'BOOLEAN', icon: 'boolean', title: 'Filter Booleans' },
+] as const;
 
 const App = () => {
 	const [results, setResults] = useState<ScanResult[]>([]);
 	const [isScanning, setIsScanning] = useState(false);
+	const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set(['COLOR', 'FLOAT', 'STRING', 'BOOLEAN']));
 
 	useEffect(() => {
 		window.onmessage = (event) => {
@@ -40,120 +49,109 @@ const App = () => {
 		parent.postMessage({ pluginMessage: { type: 'focus-layer', id } }, '*');
 	};
 
-	const styles = {
-		container: {
-			display: 'flex',
-			flexDirection: 'column' as const,
-			height: '100%',
-			padding: '16px',
-			gap: '16px',
-			color: 'var(--figma-color-text)',
-		},
-		header: {
-			display: 'flex',
-			alignItems: 'center',
-			justifyContent: 'space-between',
-			gap: '8px',
-		},
-		title: {
-			fontSize: '14px',
-			fontWeight: 600,
-			marginRight: 'auto',
-		},
-		buttonGroup: {
-			display: 'flex',
-			gap: '8px',
-		},
-		tableContainer: {
-			flex: 1,
-			overflow: 'auto',
-			border: '1px solid var(--figma-color-border)',
-			borderRadius: '4px',
-		},
-		table: {
-			width: '100%',
-			borderCollapse: 'collapse' as const,
-			fontSize: '11px',
-		},
-		th: {
-			textAlign: 'left' as const,
-			padding: '8px',
-			borderBottom: '1px solid var(--figma-color-border)',
-			backgroundColor: 'var(--figma-color-bg-secondary)',
-			position: 'sticky' as const,
-			top: 0,
-		},
-		td: {
-			padding: '8px',
-			borderBottom: '1px solid var(--figma-color-border)',
-		},
-		layerLink: {
-			color: 'var(--figma-color-text-brand)',
-			cursor: 'pointer',
-			textDecoration: 'underline',
-			background: 'none',
-			border: 'none',
-			padding: 0,
-			fontSize: 'inherit',
-		},
-		emptyState: {
-			display: 'flex',
-			flexDirection: 'column' as const,
-			alignItems: 'center',
-			justifyContent: 'center',
-			height: '100%',
-			color: 'var(--figma-color-text-secondary)',
-			gap: '8px',
-		},
+	const toggleFilter = (type: string) => {
+		const newFilters = new Set(activeFilters);
+		if (newFilters.has(type)) {
+			newFilters.delete(type);
+		} else {
+			newFilters.add(type);
+		}
+		setActiveFilters(newFilters);
 	};
 
+	const handleReset = () => {
+		setResults([]);
+		setActiveFilters(new Set(['COLOR', 'FLOAT', 'STRING', 'BOOLEAN']));
+	};
+
+	const filteredResults = results.filter(result => {
+		if (!result.resolvedType) return true; // Show if type is unknown, or handle as needed
+		return activeFilters.has(result.resolvedType);
+	});
+
 	return (
-		<div style={styles.container}>
-			<div style={styles.header}>
-				<div style={styles.title}>Variable Scanner</div>
-				<div style={styles.buttonGroup}>
-					<Button onClick={() => handleScan('page')} style={{ backgroundColor: 'var(--figma-color-bg-brand)', color: 'var(--figma-color-text-onbrand)', border: 'none' }}>
-						{isScanning ? 'Scanning...' : 'Scan Page'}
-					</Button>
-					<Button onClick={() => handleScan('file')} style={{ border: '1px solid var(--figma-color-border)' }}>
-						Scan File
-					</Button>
+		<div className="app-container">
+			<div className="app-header">
+				<div className="top-bar">
+					{results.length === 0 ? (
+						<>
+							<div className="app-title">Variable Scanner</div>
+							<div className="button-group">
+								<Button onClick={() => handleScan('file')} className="btn-secondary">
+									Scan File
+								</Button>
+								<Button onClick={() => handleScan('page')} className="btn-primary">
+									{isScanning ? 'Scanning...' : 'Scan Page'}
+								</Button>
+							</div>
+						</>
+					) : (
+						<>
+							{/* Add in a wrapper here so the reset button is aligned with the title */}
+							<div className="app-title">Variable Scanner</div>
+							<button
+								className="filter-button reset-button"
+								onClick={handleReset}
+								title="Reset"
+							>
+								<Icon svg="reset" size={20} />
+							</button>
+							<div className="filter-bar">
+								{FILTER_CONFIGS.map(({ type, icon, title }) => (
+									<button
+										key={type}
+										className={`filter-button ${activeFilters.has(type) ? 'active' : ''}`}
+										onClick={() => toggleFilter(type)}
+										title={title}
+									>
+										<Icon svg={icon} size={20} />
+									</button>
+								))}
+							</div>
+						</>
+					)}
 				</div>
 			</div>
 
-			<div style={styles.tableContainer}>
-				{results.length > 0 ? (
-					<table style={styles.table}>
+			<div className="table-container">
+				{filteredResults.length > 0 ? (
+					<table className="data-table">
 						<thead>
 							<tr>
-								<th style={styles.th}>Variable Name</th>
-								<th style={styles.th}>Count</th>
-								<th style={styles.th}>Layers</th>
+								<th className="table-header">Count - Variable Name</th>
+								<th className="table-header">Layers</th>
 							</tr>
 						</thead>
 						<tbody>
-							{results.map((result, index) => (
-								<tr key={index}>
-									<td style={styles.td}>{result.name}</td>
-									<td style={styles.td}>{result.count}</td>
-									<td style={styles.td}>
-										{result.layers.map((layer, i) => (
-											<span key={i}>
-												<button style={styles.layerLink} onClick={() => handleLayerClick(layer.id)}>
+							{filteredResults.map((result, resultIndex) => (
+								result.layers.map((layer, layerIndex) => (
+									<tr key={`${resultIndex}-${layerIndex}`}>
+										{layerIndex === 0 && (
+											<>
+												<td className="table-cell table-cell-top" rowSpan={result.layers.length}>
+													{result.count} - {result.name}
+												</td>
+											</>
+										)}
+										<td className="table-cell">
+											<div className="layer-row">
+												<div>
+													<Icon svg={layer.visible ? 'visible' : 'hidden'} size={12} />
+												</div>
+												<button className="layer-link" onClick={() => handleLayerClick(layer.id)}>
 													{layer.name}
 												</button>
-												{i < result.layers.length - 1 ? ', ' : ''}
-											</span>
-										))}
-									</td>
-								</tr>
+											</div>
+										</td>
+									</tr>
+								))
 							))}
 						</tbody>
 					</table>
 				) : (
-					<div style={styles.emptyState}>
+					<div className="empty-state">
 						<Icon svg="plugma" size={32} />
-						<div>{isScanning ? 'Scanning for variables...' : 'No variables found or scan not started.'}</div>
+						<div>{isScanning ? 'Scanning for variables...' : (results.length > 0 ? 'No results match filters.' : 'No variables found or scan not started.')}</div>
 					</div>
 				)}
 			</div>

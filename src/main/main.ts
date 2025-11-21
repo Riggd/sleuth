@@ -2,30 +2,49 @@ export default function () {
 	figma.showUI(__html__, { width: 400, height: 500, themeColors: true });
 
 	// Cache for variable details to avoid repeated API calls
-	const variableCache = new Map<string, { name: string; id: string }>();
+	const variableCache = new Map<string, { name: string; id: string; resolvedType?: VariableResolvedDataType }>();
 
 	const scanNodes = async (scope: PageNode | DocumentNode) => {
-		const variableUsage = new Map<string, { name: string; count: number; layers: { name: string; id: string }[] }>();
+		const variableUsage = new Map<string, { name: string; resolvedType?: VariableResolvedDataType; count: number; layers: { name: string; id: string; visible: boolean }[] }>();
 
 		// Phase 1: Collect nodes
 		let nodes: SceneNode[] = [];
 
 		try {
-			if (scope.type === 'DOCUMENT') {
-				// Iterate pages manually to avoid potential issues with root.findAll and to yield
-				for (const page of scope.children) {
-					const pageNodes = page.findAll((node) => {
+			const processContainer = async (container: PageNode | SceneNode) => {
+				// If it's a page, we iterate top-level children to chunk the work
+				if (container.type === 'PAGE') {
+					for (const child of container.children) {
+						// Check the child itself
+						if ('boundVariables' in child && child.boundVariables !== undefined) {
+							nodes.push(child as SceneNode);
+						}
+						// Check descendants using findAll for speed, but scoped to this child
+						if ('findAll' in child) {
+							const childNodes = (child as any).findAll((node: any) => {
+								return 'boundVariables' in node && node.boundVariables !== undefined;
+							});
+							nodes = nodes.concat(childNodes as SceneNode[]);
+						}
+						// Yield after each top-level layer to keep UI responsive
+						await new Promise(resolve => setTimeout(resolve, 0));
+					}
+				} else {
+					// Fallback for non-page scopes (though we mainly pass pages or document)
+					const found = (container as any).findAll((node: any) => {
 						return 'boundVariables' in node && node.boundVariables !== undefined;
 					});
-					nodes = nodes.concat(pageNodes as SceneNode[]);
-					// Yield between pages
-					await new Promise(resolve => setTimeout(resolve, 0));
+					nodes = nodes.concat(found as SceneNode[]);
+				}
+			};
+
+			if (scope.type === 'DOCUMENT') {
+				for (const page of scope.children) {
+					await page.loadAsync();
+					await processContainer(page);
 				}
 			} else {
-				const pageNodes = scope.findAll((node) => {
-					return 'boundVariables' in node && node.boundVariables !== undefined;
-				});
-				nodes = pageNodes as SceneNode[];
+				await processContainer(scope as PageNode);
 			}
 		} catch (e) {
 			console.error("Error collecting nodes:", e);
@@ -89,7 +108,7 @@ export default function () {
 				try {
 					const variable = await figma.variables.getVariableByIdAsync(id);
 					if (variable) {
-						variableCache.set(id, { name: variable.name, id: variable.id });
+						variableCache.set(id, { name: variable.name, id: variable.id, resolvedType: variable.resolvedType });
 					}
 				} catch (e) {
 					console.error("Error fetching variable", id, e);
@@ -112,6 +131,8 @@ export default function () {
 			if (!variableUsage.has(id)) {
 				variableUsage.set(id, {
 					name: info.name,
+					// @ts-ignore
+					resolvedType: info.resolvedType,
 					count: 0,
 					layers: []
 				});
@@ -120,17 +141,12 @@ export default function () {
 			const entry = variableUsage.get(id)!;
 
 			for (const node of nodesUsingVar) {
-				entry.count++;
 				// Avoid duplicates if a node uses the same variable multiple times (e.g. fill and stroke)
-				// The previous logic checked `!entry.layers.some(l => l.id === node.id)`
-				// But `varIdToNodes` might contain the same node multiple times if I pushed it multiple times?
-				// Wait, `aliases` might contain duplicates if used in multiple places on same node.
-				// `varIdToNodes.get(id)!.push(node)` pushes it for each alias.
-				// So we need to deduplicate here.
-
 				const isAlreadyListed = entry.layers.some(l => l.id === node.id);
 				if (!isAlreadyListed) {
-					entry.layers.push({ name: node.name, id: node.id });
+					const layerName = node.name || "Jump to Element";
+					entry.layers.push({ name: layerName, id: node.id, visible: node.visible });
+					entry.count++;
 				}
 			}
 		}
