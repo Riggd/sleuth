@@ -112,11 +112,11 @@ const App = () => {
 			<div style={styles.header}>
 				<div style={styles.title}>Variable Scanner</div>
 				<div style={styles.buttonGroup}>
-					<Button onClick={() => handleScan('page')} style={{ backgroundColor: 'var(--figma-color-bg-brand)', color: 'var(--figma-color-text-onbrand)', border: 'none' }}>
-						{isScanning ? 'Scanning...' : 'Scan Page'}
-					</Button>
 					<Button onClick={() => handleScan('file')} style={{ border: '1px solid var(--figma-color-border)' }}>
 						Scan File
+					</Button>
+					<Button onClick={() => handleScan('page')} style={{ backgroundColor: 'var(--figma-color-bg-brand)', color: 'var(--figma-color-text-onbrand)', border: 'none' }}>
+						{isScanning ? 'Scanning...' : 'Scan Page'}
 					</Button>
 				</div>
 			</div>
@@ -126,27 +126,28 @@ const App = () => {
 					<table style={styles.table}>
 						<thead>
 							<tr>
-								<th style={styles.th}>Variable Name</th>
-								<th style={styles.th}>Count</th>
+								<th style={styles.th}>Count - Variable Name</th>
 								<th style={styles.th}>Layers</th>
 							</tr>
 						</thead>
 						<tbody>
-							{results.map((result, index) => (
-								<tr key={index}>
-									<td style={styles.td}>{result.name}</td>
-									<td style={styles.td}>{result.count}</td>
-									<td style={styles.td}>
-										{result.layers.map((layer, i) => (
-											<span key={i}>
-												<button style={styles.layerLink} onClick={() => handleLayerClick(layer.id)}>
-													{layer.name}
-												</button>
-												{i < result.layers.length - 1 ? ', ' : ''}
-											</span>
-										))}
-									</td>
-								</tr>
+							{results.map((result, resultIndex) => (
+								result.layers.map((layer, layerIndex) => (
+									<tr key={`${resultIndex}-${layerIndex}`}>
+										{layerIndex === 0 && (
+											<>
+												<td style={{ ...styles.td, verticalAlign: 'top' }} rowSpan={result.layers.length}>
+													{result.count} - {result.name}
+												</td>
+											</>
+										)}
+										<td style={styles.td}>
+											<button style={styles.layerLink} onClick={() => handleLayerClick(layer.id)}>
+												{layer.name}
+											</button>
+										</td>
+									</tr>
+								))
 							))}
 						</tbody>
 					</table>

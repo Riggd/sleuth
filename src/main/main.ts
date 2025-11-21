@@ -11,21 +11,40 @@ export default function () {
 		let nodes: SceneNode[] = [];
 
 		try {
-			if (scope.type === 'DOCUMENT') {
-				// Iterate pages manually to avoid potential issues with root.findAll and to yield
-				for (const page of scope.children) {
-					const pageNodes = page.findAll((node) => {
+			const processContainer = async (container: PageNode | SceneNode) => {
+				// If it's a page, we iterate top-level children to chunk the work
+				if (container.type === 'PAGE') {
+					for (const child of container.children) {
+						// Check the child itself
+						if ('boundVariables' in child && child.boundVariables !== undefined) {
+							nodes.push(child as SceneNode);
+						}
+						// Check descendants using findAll for speed, but scoped to this child
+						if ('findAll' in child) {
+							const childNodes = (child as any).findAll((node: any) => {
+								return 'boundVariables' in node && node.boundVariables !== undefined;
+							});
+							nodes = nodes.concat(childNodes as SceneNode[]);
+						}
+						// Yield after each top-level layer to keep UI responsive
+						await new Promise(resolve => setTimeout(resolve, 0));
+					}
+				} else {
+					// Fallback for non-page scopes (though we mainly pass pages or document)
+					const found = (container as any).findAll((node: any) => {
 						return 'boundVariables' in node && node.boundVariables !== undefined;
 					});
-					nodes = nodes.concat(pageNodes as SceneNode[]);
-					// Yield between pages
-					await new Promise(resolve => setTimeout(resolve, 0));
+					nodes = nodes.concat(found as SceneNode[]);
+				}
+			};
+
+			if (scope.type === 'DOCUMENT') {
+				for (const page of scope.children) {
+					await page.loadAsync();
+					await processContainer(page);
 				}
 			} else {
-				const pageNodes = scope.findAll((node) => {
-					return 'boundVariables' in node && node.boundVariables !== undefined;
-				});
-				nodes = pageNodes as SceneNode[];
+				await processContainer(scope as PageNode);
 			}
 		} catch (e) {
 			console.error("Error collecting nodes:", e);
