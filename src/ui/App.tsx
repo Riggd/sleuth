@@ -88,14 +88,16 @@ const App = () => {
 					) : (
 						<>
 							{/* Add in a wrapper here so the reset button is aligned with the title */}
-							<div className="app-title">Variable Scanner</div>
-							<button
-								className="filter-button reset-button"
-								onClick={handleReset}
-								title="Reset"
-							>
-								<Icon svg="reset" size={20} />
-							</button>
+							<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: 8 }}>
+								<div className="app-title">Variable Scanner</div>
+								<button
+									className="filter-button reset-button"
+									onClick={handleReset}
+									title="Reset"
+								>
+									<Icon svg="reset" size={20} />
+								</button>
+							</div>
 							<div className="filter-bar">
 								{FILTER_CONFIGS.map(({ type, icon, title }) => (
 									<button
@@ -129,7 +131,9 @@ const App = () => {
 										{layerIndex === 0 && (
 											<>
 												<td className="table-cell table-cell-top" rowSpan={result.layers.length}>
-													{result.count} - {result.name}
+													<div className="sticky-variable-name">
+														{result.count} - {result.name}
+													</div>
 												</td>
 											</>
 										)}
