@@ -9,7 +9,7 @@ export default function () {
 		const isNodeVisible = (node: SceneNode): boolean => {
 			let current: BaseNode | null = node;
 			while (current && 'visible' in current) {
-				if (!(current as any).visible) {
+				if (!(current as { visible: boolean }).visible) {
 					return false;
 				}
 				current = current.parent;
