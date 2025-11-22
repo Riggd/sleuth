@@ -93,7 +93,7 @@ const App = () => {
 								<button
 									className="filter-button reset-button"
 									onClick={handleReset}
-									title="Reset"
+									title="Reset plugin"
 								>
 									<Icon svg="reset" size={20} />
 								</button>

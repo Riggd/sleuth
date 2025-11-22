@@ -92,6 +92,12 @@ i18n-text {
 	gap: 8px;
 }
 
+.title-container {
+	display: flex;
+	align-items: center;
+	gap: var(--spacer-2);
+}
+
 /* Filter Bar */
 .filter-bar {
 	display: flex;
@@ -124,10 +130,6 @@ i18n-text {
 .filter-button.active:hover {
 	background-color: var(--figma-color-bg-brand-hover);
 }
-
-/* .filter-button.reset-button {
-	margin-left: auto;
-} */
 
 /* Data Table */
 .table-container {
