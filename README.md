@@ -1,4 +1,4 @@
-# Find My Variables
+# You found Sleuth!
 
 ## Quickstart
 

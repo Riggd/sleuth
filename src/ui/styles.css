@@ -82,7 +82,7 @@ i18n-text {
 }
 
 .app-title {
-	font-size: 14px;
+	font-size: 16px;
 	font-weight: 600;
 	margin-right: 0;
 }
@@ -90,6 +90,12 @@ i18n-text {
 .button-group {
 	display: flex;
 	gap: 8px;
+}
+
+.title-container {
+	display: flex;
+	align-items: center;
+	gap: var(--spacer-2);
 }
 
 /* Filter Bar */
@@ -125,10 +131,6 @@ i18n-text {
 	background-color: var(--figma-color-bg-brand-hover);
 }
 
-.filter-button.reset-button {
-	margin-left: auto;
-}
-
 /* Data Table */
 .table-container {
 	flex: 1;
@@ -150,6 +152,7 @@ i18n-text {
 	background-color: var(--figma-color-bg-secondary);
 	position: sticky;
 	top: 0;
+	z-index: 10;
 }
 
 .table-cell {
@@ -160,6 +163,11 @@ i18n-text {
 
 .table-cell-top {
 	vertical-align: top;
+}
+
+.sticky-variable-name {
+	position: sticky;
+	top: 32px;
 }
 
 .layer-row {

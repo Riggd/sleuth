@@ -5,6 +5,18 @@ export default function () {
 	const variableCache = new Map<string, { name: string; id: string; resolvedType?: VariableResolvedDataType }>();
 
 	const scanNodes = async (scope: PageNode | DocumentNode) => {
+		// Helper to check if a node and all its parents are visible
+		const isNodeVisible = (node: SceneNode): boolean => {
+			let current: BaseNode | null = node;
+			while (current && 'visible' in current) {
+				if (!(current as { visible: boolean }).visible) {
+					return false;
+				}
+				current = current.parent;
+			}
+			return true;
+		};
+
 		const variableUsage = new Map<string, { name: string; resolvedType?: VariableResolvedDataType; count: number; layers: { name: string; id: string; visible: boolean }[] }>();
 
 		// Phase 1: Collect nodes
@@ -145,7 +157,7 @@ export default function () {
 				const isAlreadyListed = entry.layers.some(l => l.id === node.id);
 				if (!isAlreadyListed) {
 					const layerName = node.name || "Jump to Element";
-					entry.layers.push({ name: layerName, id: node.id, visible: node.visible });
+					entry.layers.push({ name: layerName, id: node.id, visible: isNodeVisible(node) });
 					entry.count++;
 				}
 			}
