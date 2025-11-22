@@ -88,7 +88,7 @@ const App = () => {
 					) : (
 						<>
 							{/* Add in a wrapper here so the reset button is aligned with the title */}
-							<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: 8 }}>
+							<div className="title-container">
 								<div className="app-title">Variable Scanner</div>
 								<button
 									className="filter-button reset-button"
