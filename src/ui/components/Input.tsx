@@ -19,7 +19,7 @@ const Input = ({
 		display: 'contents',
 	};
 
-	const labelStyle = {
+	const labelStyle: React.CSSProperties = {
 		margin: '1px 0',
 		display: 'flex',
 		backgroundColor: 'var(--figma-color-bg-secondary)',
@@ -31,7 +31,7 @@ const Input = ({
 		width: '100%',
 	};
 
-	const iconStyle = {
+	const iconStyle: React.CSSProperties = {
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
@@ -54,7 +54,7 @@ const Input = ({
 		marginRight: '-8px',
 	};
 
-	const inputStyle = {
+	const inputStyle: React.CSSProperties = {
 		height: 'var(--spacer-4)',
 		display: 'flex',
 		margin: '0',
