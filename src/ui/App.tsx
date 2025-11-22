@@ -87,7 +87,6 @@ const App = () => {
 						</>
 					) : (
 						<>
-							{/* Add in a wrapper here so the reset button is aligned with the title */}
 							<div className="title-container">
 								<div className="app-title">Variable Scanner</div>
 								<button
