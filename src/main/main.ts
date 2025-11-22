@@ -1,3 +1,5 @@
+import { createNyanCat } from './nyanCat';
+
 export default function () {
 	figma.showUI(__html__, { width: 400, height: 500, themeColors: true });
 
@@ -189,12 +191,83 @@ export default function () {
 							currentNode = currentNode.parent as any;
 						}
 
+						const ENABLE_NYAN_CAT_ANIMATION = true;
+
 						if (currentNode.type === 'PAGE' && currentNode !== figma.currentPage) {
 							await figma.setCurrentPageAsync(currentNode as PageNode);
+						} else if (ENABLE_NYAN_CAT_ANIMATION && currentNode === figma.currentPage) {
+							try {
+								// Logic for Nyan Cat animation on same page
+
+								const nyanCat = createNyanCat();
+
+								// Center on current viewport
+								let center = figma.viewport.center;
+								nyanCat.x = center.x - (nyanCat.width / 2);
+								nyanCat.y = center.y - (nyanCat.height / 2);
+
+								// Add to page so it's visible
+								figma.currentPage.appendChild(nyanCat);
+
+								// Calculate target position
+								const targetNode = node as SceneNode;
+								const targetBounds = targetNode.absoluteBoundingBox;
+
+								if (targetBounds) {
+									const targetX = targetBounds.x + targetBounds.width / 2;
+									const targetY = targetBounds.y + targetBounds.height / 2;
+									const startX = center.x;
+									const startY = center.y;
+
+									const startTime = Date.now();
+									const duration = 1500; // 1.5 seconds
+
+									const animate = () => {
+										const now = Date.now();
+										const elapsed = now - startTime;
+										const progress = Math.min(elapsed / duration, 1);
+
+										// Ease in out quad
+										const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+
+										const currentX = startX + (targetX - startX) * ease;
+										const currentY = startY + (targetY - startY) * ease;
+
+										figma.viewport.center = { x: currentX, y: currentY };
+
+										// Keep Nyan Cat centered
+										nyanCat.x = currentX - (nyanCat.width / 2);
+										nyanCat.y = currentY - (nyanCat.height / 2);
+
+										if (progress < 1) {
+											// Continue animation
+											setTimeout(animate, 16);
+										} else {
+											// Finish
+											nyanCat.remove();
+											// Ensure final selection
+											figma.currentPage.selection = [targetNode];
+										}
+									};
+
+									animate();
+								} else {
+									// Fallback if no bounds
+									figma.viewport.scrollAndZoomIntoView([node as SceneNode]);
+									nyanCat.remove();
+								}
+
+							} catch (e) {
+								console.error("Error playing Nyan Cat animation:", e);
+								// Fallback to normal scroll if animation fails
+								figma.viewport.scrollAndZoomIntoView([node as SceneNode]);
+							}
 						}
 
 						figma.currentPage.selection = [node as SceneNode];
-						figma.viewport.scrollAndZoomIntoView([node as SceneNode]);
+						if (!ENABLE_NYAN_CAT_ANIMATION || currentNode !== figma.currentPage) {
+							figma.viewport.scrollAndZoomIntoView([node as SceneNode]);
+						}
 					}
 				}
 			}
