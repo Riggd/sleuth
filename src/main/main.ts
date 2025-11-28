@@ -210,27 +210,61 @@ export default function () {
 									const startX = center.x;
 									const startY = center.y;
 
-									const isMovingLeft = targetX < startX;
+									const dx = targetX - startX;
+									const dy = targetY - startY;
+									const angleRad = Math.atan2(dy, dx);
+									const angleDeg = angleRad * (180 / Math.PI);
 
 									const nyanCat = createNyanCat();
 
-									if (isMovingLeft) {
-										// Flip horizontally
-										const t = JSON.parse(JSON.stringify(nyanCat.relativeTransform));
-										t[0][0] = -1;
-										nyanCat.relativeTransform = t;
+									// Determine if we need to flip (moving leftwards)
+									const isFlipped = Math.abs(angleDeg) > 90;
+
+									// Calculate transformation matrix components
+									const cos = Math.cos(angleRad);
+									const sin = Math.sin(angleRad);
+
+									let a, b, c, d;
+									if (isFlipped) {
+										// Flip Y local then Rotate: [[cos, sin], [sin, -cos]]
+										a = cos;
+										b = sin;
+										c = sin;
+										d = -cos;
+									} else {
+										// Standard Rotation: [[cos, -sin], [sin, cos]]
+										a = cos;
+										b = -sin;
+										c = sin;
+										d = cos;
 									}
+
+									// Calculate offset to keep center aligned
+									// We want the center of the node (w/2, h/2) to be at (0, 0) relative to the transform origin?
+									// No, we want the transform origin (x, y) to be such that the visual center is at currentX, currentY.
+									// Visual center relative to origin is T * [w/2, h/2].
+									// cx_rel = a*w/2 + b*h/2
+									// cy_rel = c*w/2 + d*h/2
+
+									const w = nyanCat.width;
+									const h = nyanCat.height;
+
+									const offsetX = a * (w / 2) + b * (h / 2);
+									const offsetY = c * (w / 2) + d * (h / 2);
+
+									// Apply transform with initial position
+									// We set the matrix directly. x and y (tx, ty) will be updated in the loop.
+									// Initial tx, ty:
+									const initialTx = startX - offsetX;
+									const initialTy = startY - offsetY;
+
+									nyanCat.relativeTransform = [
+										[a, b, initialTx],
+										[c, d, initialTy]
+									];
 
 									// Add to page so it's visible
 									figma.currentPage.appendChild(nyanCat);
-
-									// Initial position
-									if (isMovingLeft) {
-										nyanCat.x = startX + (nyanCat.width / 2);
-									} else {
-										nyanCat.x = startX - (nyanCat.width / 2);
-									}
-									nyanCat.y = startY - (nyanCat.height / 2);
 
 									const startTime = Date.now();
 									const duration = 1500; // 1.5 seconds
@@ -248,13 +282,9 @@ export default function () {
 
 										figma.viewport.center = { x: currentX, y: currentY };
 
-										// Keep Nyan Cat centered
-										if (isMovingLeft) {
-											nyanCat.x = currentX + (nyanCat.width / 2);
-										} else {
-											nyanCat.x = currentX - (nyanCat.width / 2);
-										}
-										nyanCat.y = currentY - (nyanCat.height / 2);
+										// Update position (tx, ty)
+										nyanCat.x = currentX - offsetX;
+										nyanCat.y = currentY - offsetY;
 
 										if (progress < 1) {
 											// Continue animation
