@@ -199,25 +199,38 @@ export default function () {
 							try {
 								// Logic for Nyan Cat animation on same page
 
-								const nyanCat = createNyanCat();
-
-								// Center on current viewport
-								let center = figma.viewport.center;
-								nyanCat.x = center.x - (nyanCat.width / 2);
-								nyanCat.y = center.y - (nyanCat.height / 2);
-
-								// Add to page so it's visible
-								figma.currentPage.appendChild(nyanCat);
-
 								// Calculate target position
 								const targetNode = node as SceneNode;
 								const targetBounds = targetNode.absoluteBoundingBox;
 
 								if (targetBounds) {
+									const center = figma.viewport.center;
 									const targetX = targetBounds.x + targetBounds.width / 2;
 									const targetY = targetBounds.y + targetBounds.height / 2;
 									const startX = center.x;
 									const startY = center.y;
+
+									const isMovingLeft = targetX < startX;
+
+									const nyanCat = createNyanCat();
+
+									if (isMovingLeft) {
+										// Flip horizontally
+										const t = JSON.parse(JSON.stringify(nyanCat.relativeTransform));
+										t[0][0] = -1;
+										nyanCat.relativeTransform = t;
+									}
+
+									// Add to page so it's visible
+									figma.currentPage.appendChild(nyanCat);
+
+									// Initial position
+									if (isMovingLeft) {
+										nyanCat.x = startX + (nyanCat.width / 2);
+									} else {
+										nyanCat.x = startX - (nyanCat.width / 2);
+									}
+									nyanCat.y = startY - (nyanCat.height / 2);
 
 									const startTime = Date.now();
 									const duration = 1500; // 1.5 seconds
@@ -236,7 +249,11 @@ export default function () {
 										figma.viewport.center = { x: currentX, y: currentY };
 
 										// Keep Nyan Cat centered
-										nyanCat.x = currentX - (nyanCat.width / 2);
+										if (isMovingLeft) {
+											nyanCat.x = currentX + (nyanCat.width / 2);
+										} else {
+											nyanCat.x = currentX - (nyanCat.width / 2);
+										}
 										nyanCat.y = currentY - (nyanCat.height / 2);
 
 										if (progress < 1) {
@@ -254,7 +271,6 @@ export default function () {
 								} else {
 									// Fallback if no bounds
 									figma.viewport.scrollAndZoomIntoView([node as SceneNode]);
-									nyanCat.remove();
 								}
 
 							} catch (e) {
