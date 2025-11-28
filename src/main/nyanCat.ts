@@ -1,7 +1,7 @@
 export const createNyanCat = () => {
     const scale = 5;
     const frame = figma.createFrame();
-    frame.name = "Nyan Cat Vector";
+    frame.name = "Buckle up!";
     frame.fills = [];
     frame.clipsContent = false;
 
@@ -20,23 +20,22 @@ export const createNyanCat = () => {
         'W': { r: 1, g: 1, b: 1 }, // White
     };
 
-    // 21 rows x 34 cols approx
+    // 14 rows x 34 cols approx
     const art = [
-        "...................#######........",
-        "...................#ggggg#........",
-        "...................#g#g#g#........",
-        "...........########xg#g#g#........",
-        "..........#tttttttt#g###g#........",
-        "RRRRRRRRR#ttppppppppt#gggg#.......",
-        "OOOOOOOOO#tppppppppppt#######.....",
-        "YYYYYYYYY#tppppppppppt#ggggg#.....",
-        "GGGGGGGGG#tppppppppppt#g#g#g#.....",
-        "BBBBBBBBB#tppppppppppt#g#g#g#.....",
-        "PPPPPPPPP#ttppppppppt#g###g#......",
-        "..........#ttttttttt#ggggg#.......",
-        "...........################.......",
-        "...........#gg#....#g#.#g#........",
-        "...........####....###.###........"
+        "..................................",
+        "...........###################....",
+        "..........#ttttttttttttttttttt#...",
+        "..........#ttppppppppppppppptt#...",
+        "......RR..#tpppppppppppppppppt#...",
+        "RR..RROORR#tppRppOpppppppppppt#...",
+        "OORROOYYOO#tpppppppppppppppppt#...",
+        "YYOOYYGGYY#tppOppRpppppppppppt#...",
+        "GGYYGGBBGG#tpppppppppppppppppt#...",
+        "BBGGBBPPBB#ttpRppOpppppppppptt#...",
+        "PPBBPP..PP#ttttttttttttttttttt#...",
+        "..PP.......###################....",
+        "..........#gg#.#gg#....#g#.#g#....",
+        "..........###..###.....##..##....."
     ];
 
     let maxX = 0;
